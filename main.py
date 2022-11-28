@@ -19,6 +19,9 @@ def main():
     # keep track of all nodes visited
     visited = {}
 
+    # make sure we don't go over the same node as it runs the same results
+    seen = set()
+
     # we import a queue to take into account which child nodes we have to iterate for
     queue = collections.deque()
 
@@ -30,6 +33,12 @@ def main():
 
     # append to queue the initial starting node
     queue.append(starting_node)
+
+
+    visited[starting_node] = 1
+
+    # use a set to keep track of nodes already visited
+    seen.add(starting_node)
 
     # keep executing until the queue is empty
     while len(queue) != 0:
@@ -49,29 +58,30 @@ def main():
         # get name of id 
         id = data[0]["id"]
 
-        # increment our visited counter
-        if id not in visited:
-            visited[id] = 1
-        else:
-            visited[id] += 1
-
         # get child ids
         child_ids = data[0]["child_node_ids"]
 
         # iterate over each child node and add to queue
         for c in child_ids:
-            queue.append(c)
+
+            # if child has not been before - add to seen list so we don't add to queue again
+            if c not in seen:
+                queue.append(c)
+                visited[c] = 1
+                seen.add(c)
+                
+            # if child has been seen before - no need to execute that API call again - add to seen 
+            else:
+                visited[c] += 1
+
+            
+
+
 
 
     # iterate over visited dictionary and see what was max
-    most_common_node = ""
-    max_hits = 0
+    most_common_node = max(visited, key=visited.get)
 
-    for i, (k, v) in enumerate(visited.items()):
-        # check for each key what node had the most counts
-        if v > max_hits:
-            max_hits = v
-            most_common_node = k
 
     # print out results
     print("Most Common Node: " + most_common_node)
